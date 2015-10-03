@@ -1,2 +1,2 @@
 ---
-marathon_wait_for_deployment: true
+marathon_wait_for_deployment: false

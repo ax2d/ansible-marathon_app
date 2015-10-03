@@ -1,7 +1,13 @@
 ---
+- name: Install python libs for ansible
+  easy_install: name={{ item }}
+  with_items:
+    - httplib2
+    - jinja2
+
 - name: "launch app: {{ marathon_app.id }}"
   uri: >
-    url="{{ marathon_url }}/v2/apps{{ marathon_app.id }}"
+    url="{{ marathon_url }}/v2/apps/{{ marathon_app.id }}"
     method=PUT
     HEADER_Content-Type="application/json"
     body='{{ marathon_app | to_json }}'
@@ -10,11 +16,11 @@
 
 - name: "wait for app: {{ marathon_app.id }}"
   uri: >
-    url="{{ marathon_url }}/v2/deployments"
+    url="{{ marathon_url }}/v2/apps/{{ marathon_app.id }}"
     method=GET
     status_code=200
   register: marathon_deployments
-  until: "{{ marathon_deployment.json.deploymentId not in marathon_deployments.json|map(attribute='id') }}"
+  until: "{{ marathon_deployments.json.app.deployments|length == 0 }}"
   delay: 1
   retries: 3600
   when: marathon_wait_for_deployment
